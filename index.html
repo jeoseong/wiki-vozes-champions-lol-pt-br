@@ -11,6 +11,7 @@
             --bg-card: #0d1017;
             --accent-gold: #c8aa6e;
             --accent-gold-bright: #f0e6d2;
+            --accent-gold-glow: #e2be72;
             --border-color: #1a1e26;
             --border-gold: #785a28;
             --text-main: #a09b8c;
@@ -399,16 +400,49 @@
             align-items: flex-start;
             gap: 8px;
             margin-bottom: 10px;
-            padding: 4px 6px 4px 10px;
+            padding: 6px 8px 6px 12px;
             position: relative;
             border-radius: 2px;
-            transition: background 0.3s, border-left 0.3s;
+            transition: all 0.3s ease;
+            border-left: 3px solid transparent;
         }
 
-        /* Efeito Translúcido / Esvanecendo na Caixa em Reprodução */
+        /* Formatação de Negrito Aparente Estilo LoL Wiki */
+        .quote-content-text b, 
+        .quote-content-text strong,
+        .dynamic-header-content b,
+        .dynamic-header-content strong {
+            font-weight: 800 !important;
+            color: #ffffff !important;
+            text-shadow: 0 0 2px rgba(255, 255, 255, 0.4);
+            letter-spacing: 0.2px;
+        }
+
+        /* Efeito de Reprodução Estilo Wild Rift (Dourado Intenso no Começo e Esvanecendo no Final) */
         .quote-row.is-playing {
-            background: linear-gradient(90deg, rgba(200, 170, 110, 0.28) 0%, rgba(200, 170, 110, 0.12) 50%, rgba(200, 170, 110, 0.0) 100%);
-            border-left: 3px solid var(--accent-gold);
+            background: linear-gradient(90deg, 
+                rgba(226, 190, 114, 0.45) 0%, 
+                rgba(200, 170, 110, 0.25) 30%, 
+                rgba(200, 170, 110, 0.08) 70%, 
+                rgba(6, 8, 12, 0.0) 100%);
+            border-top: 1px solid rgba(226, 190, 114, 0.6);
+            border-bottom: 1px solid rgba(226, 190, 114, 0.3);
+            border-left: 3px solid var(--accent-gold-glow);
+            box-shadow: inset 10px 0 15px -5px rgba(226, 190, 114, 0.5);
+        }
+
+        /* Detalhe do Losango/Seta do Wild Rift no Início da Caixa */
+        .quote-row.is-playing::after {
+            content: "";
+            position: absolute;
+            left: -6px;
+            top: 50%;
+            transform: translateY(-50%) rotate(45deg);
+            width: 7px;
+            height: 7px;
+            background: var(--accent-gold-bright);
+            border: 1px solid #000;
+            box-shadow: 0 0 6px var(--accent-gold-glow);
         }
 
         .quote-bullet {
@@ -455,6 +489,7 @@
             color: var(--accent-gold);
             flex-shrink: 0;
             margin-top: 2px;
+            z-index: 2;
         }
 
         .fandom-audio-btn.play-icon::after {
@@ -652,7 +687,6 @@
             border-radius: 2px; padding: 6px; color: var(--text-bright); font-size: 0.8rem; outline: none; user-select: text;
         }
 
-        /* Editor de Texto com Barra de Ferramentas EMBAIXO */
         .editor-container {
             display: flex;
             flex-direction: column;
@@ -700,7 +734,6 @@
             background: rgba(200, 170, 110, 0.15);
         }
 
-        /* Campo de Áudio com Botão de Excluir ✕ */
         .audio-input-row {
             display: flex;
             align-items: center;
@@ -954,7 +987,6 @@ Primeiro Movimento
         </div>
     </div>
 
-    <!-- Modal de Edição de Fala Com Ferramentas Abaixo e Botões ✕ nos Áudios -->
     <div class="modal-overlay" id="quoteModal" style="display: none;">
         <div class="modal-content">
             <div class="modal-header">
@@ -1113,7 +1145,6 @@ Primeiro Movimento
         function showChampionsList() {
             currentChampId = null;
 
-            // Esconde fundo fixo na lista
             document.getElementById("fixedBgLayer").style.display = 'none';
             document.getElementById("fixedBgOverlay").style.display = 'none';
 
@@ -1205,7 +1236,6 @@ Primeiro Movimento
             const activeSplashImg = currentSkin.splash || champ.splashUrl || champ.imgUrl || '';
             const activeSkinName = currentSkin.name || champ.name;
 
-            // Aplica a Splash Art de Fundo no layer fixo independente
             const fixedBg = document.getElementById("fixedBgLayer");
             const fixedOverlay = document.getElementById("fixedBgOverlay");
             if (activeSplashImg) {
@@ -1381,7 +1411,7 @@ Primeiro Movimento
                 frameVideo.pause();
                 frameVideo.style.display = 'none';
                 frame.style.backgroundImage = `url('${activeFrameImg}')`;
-                frame.style.backgroundPosition = `${s.posX ?? 50}% ${s.posY ?? 50}%`;
+                frame.style.backgroundPosition = `${s.posX ?? 50}% ${s.posY ?? 50}%;`;
             }
 
             renderContentArea();
@@ -1984,15 +2014,13 @@ Primeiro Movimento
                 document.getElementById("quoteTextEditor").innerHTML = item.text || "";
                 catSelect.value = item.categoryId || "";
                 document.getElementById("quotePositionSelect").value = item.position || "end";
-                
-                // Filtra e só insere áudios válidos não-vazios
+
                 if (item.audios && item.audios.length > 0) {
                     item.audios.forEach(url => {
                         if (url && url.trim()) addAudioInputRow(url.trim());
                     });
                 }
-                
-                // Se nenhum áudio válido for encontrado, coloca 1 campo limpo
+
                 if (container.children.length === 0) {
                     addAudioInputRow();
                 }
@@ -2008,7 +2036,6 @@ Primeiro Movimento
             document.getElementById("quoteModal").style.display = "flex";
         }
 
-        /* Adiciona campo de áudio com o botão de excluir ✕ do lado */
         function addAudioInputRow(value = "") {
             const container = document.getElementById("audioInputsContainer");
             const row = document.createElement("div");
@@ -2020,7 +2047,6 @@ Primeiro Movimento
             container.appendChild(row);
         }
 
-        /* Exclui diretamente a linha do áudio ao clicar no ✕ */
         function removeAudioRow(btn) {
             const row = btn.closest(".audio-input-row");
             if (row) row.remove();
@@ -2032,8 +2058,7 @@ Primeiro Movimento
             const categoryId = categoryIdVal ? parseInt(categoryIdVal) : null;
             const position = document.getElementById("quotePositionSelect").value;
             const text = document.getElementById("quoteTextEditor").innerHTML;
-            
-            // Remove qualquer valor em branco/vazio da lista de áudios
+
             const audios = Array.from(document.querySelectorAll(".audio-url-val"))
                 .map(i => i.value.trim())
                 .filter(url => url.length > 0);
