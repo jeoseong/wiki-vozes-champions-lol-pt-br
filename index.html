@@ -47,21 +47,21 @@
             position: relative;
         }
 
-        /* BANNER DE FUNDO TOTALMENTE IMÓVEL / ZERO TREPIDAÇÃO EM CELULARES */
+        /* TRANSIÇÃO E RE-RENDERIZAÇÃO DA SPLASH ART DE FUNDO (SEM PISCAR / RE-RENDERIZAR) */
         #fixedBgLayer {
             position: fixed;
             top: -10dvh;
             left: 0;
             width: 100vw;
-            height: 120dvh; /* Estende além da tela para absorbing o resize da barra do navegador */
+            height: 120dvh;
             background-size: cover;
             background-position: center top;
             background-repeat: no-repeat;
             z-index: -2;
             pointer-events: none;
-            display: none;
-            /* Força renderização direta na placa gráfica (GPU) */
-            will-change: transform;
+            opacity: 0;
+            transition: opacity 0.4s ease-in-out;
+            will-change: opacity, transform;
             transform: translate3d(0,0,0);
             -webkit-transform: translate3d(0,0,0);
             backface-visibility: hidden;
@@ -78,13 +78,14 @@
             backdrop-filter: blur(2px);
             z-index: -1;
             pointer-events: none;
-            display: none;
-            will-change: transform;
+            opacity: 0;
+            transition: opacity 0.4s ease-in-out;
+            will-change: opacity, transform;
             transform: translate3d(0,0,0);
             -webkit-transform: translate3d(0,0,0);
         }
 
-        /* Cabeçalho Fixo sem sobressalto */
+        /* Cabeçalho Fixo Permanente (Incondicional) */
         header {
             position: sticky;
             top: 0;
@@ -152,11 +153,6 @@
             font-family: var(--font-gill);
         }
 
-        .btn.active-mode {
-            background: linear-gradient(135deg, var(--accent-gold), #785a28);
-            color: #000;
-        }
-
         .champions-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
@@ -176,6 +172,12 @@
             background-size: cover;
             background-position: center;
             cursor: pointer;
+            transition: transform 0.2s ease, border-color 0.2s ease;
+        }
+
+        .champ-card:hover {
+            transform: translateY(-2px);
+            border-color: var(--accent-gold-bright);
         }
 
         .champ-card-video {
@@ -185,6 +187,7 @@
             height: 100%;
             object-fit: cover;
             z-index: 0;
+            transition: opacity 0.3s ease-in-out;
         }
 
         .champ-card-overlay {
@@ -280,7 +283,7 @@
             background-size: cover;
             background-repeat: no-repeat;
             background-position: center;
-            transition: background-image 0.3s ease-in-out;
+            transition: background-image 0.3s ease-in-out, opacity 0.3s ease-in-out;
             overflow: hidden;
         }
 
@@ -288,6 +291,7 @@
             width: 100%;
             height: 100%;
             object-fit: cover;
+            transition: opacity 0.3s ease-in-out;
         }
 
         .hero-name {
@@ -352,7 +356,15 @@
             font-family: var(--font-gill);
         }
 
-        .skins-section { padding: 16px; max-width: 800px; margin: 0 auto; }
+        /* NAVEGAÇÃO DE SKINS PERMANENTE E INDESCONDÍVEL */
+        .skins-section { 
+            padding: 16px; 
+            max-width: 800px; 
+            margin: 0 auto; 
+            display: block !important; 
+            visibility: visible !important;
+        }
+
         .section-label {
             font-family: var(--font-gill);
             font-size: 0.75rem;
@@ -392,11 +404,11 @@
             background-position: center;
             margin-bottom: 4px;
             box-shadow: 0 0 6px rgba(0,0,0,0.6);
-            transition: border-color 0.2s;
+            transition: border-color 0.2s, transform 0.2s ease;
             overflow: hidden;
         }
 
-        .skin-item:hover .skin-thumb { border-color: var(--accent-gold); }
+        .skin-item:hover .skin-thumb { border-color: var(--accent-gold); transform: scale(1.03); }
 
         .skin-item.active .skin-thumb {
             border: 2px solid var(--accent-gold-bright);
@@ -419,7 +431,14 @@
             background: rgba(200, 170, 110, 0.05);
         }
 
-        .content-area { max-width: 800px; margin: 0 auto; padding: 0 16px 20px 16px; }
+        /* ÁREA DE CONTEÚDO E FALA */
+        .content-area { 
+            max-width: 800px; 
+            margin: 0 auto; 
+            padding: 0 16px 20px 16px; 
+            display: block !important;
+            visibility: visible !important;
+        }
 
         .dynamic-header-container {
             display: flex;
@@ -451,7 +470,6 @@
         }
         .action-icon { cursor: pointer; font-size: 0.68rem; padding: 2px 5px; background: rgba(255, 255, 255, 0.1); }
 
-        /* Caixa de Fala Padrão */
         .quote-row {
             display: flex;
             align-items: flex-start;
@@ -474,7 +492,6 @@
             letter-spacing: 0.3px;
         }
 
-        /* Caixa em Reprodução - Estilo RANKED */
         .quote-row.is-playing {
             background: linear-gradient(90deg, 
                 rgba(226, 190, 114, 0.38) 0%, 
@@ -572,7 +589,6 @@
             border-right: 2px solid #000;
         }
 
-        /* Reprodutor Inferior Estável */
         .lol-sounds-player {
             position: fixed;
             bottom: 0;
@@ -960,7 +976,7 @@ Primeiro Movimento
                 <input type="text" id="champNameInput">
             </div>
             <div class="form-group">
-                <label>Título / Epíteto (Ex: o Aspecto do Crespúsculo)</label>
+                <label>Título / Epíteto (Ex: o Aspecto do Crepúsculo)</label>
                 <input type="text" id="champTitleInput">
             </div>
             <div class="form-group">
@@ -1111,7 +1127,6 @@ Primeiro Movimento
         let selectedSkinIndex = 0;
         let currentAudioList = [];
         let currentAudioIndex = -1;
-        let isEditMode = true;
         let videoObserver = null;
 
         const globalPlayer = document.getElementById("globalAudioPlayer");
@@ -1203,12 +1218,6 @@ Primeiro Movimento
             }
         }
 
-        function toggleEditMode() {
-            isEditMode = !isEditMode;
-            if (currentChampId !== null) showChampionPage(currentChampId);
-            else showChampionsList();
-        }
-
         function updatePlayerMiniature() {
             const frame = document.getElementById("playerChampThumbFrame");
             if (!frame) return;
@@ -1230,25 +1239,17 @@ Primeiro Movimento
         function showChampionsList() {
             currentChampId = null;
 
-            document.getElementById("fixedBgLayer").style.display = 'none';
-            document.getElementById("fixedBgOverlay").style.display = 'none';
+            const fixedBg = document.getElementById("fixedBgLayer");
+            const fixedOverlay = document.getElementById("fixedBgOverlay");
+            fixedBg.style.opacity = '0';
+            fixedOverlay.style.opacity = '0';
 
             const btnGroup = document.getElementById("headerBtnGroup");
-
-            if (isEditMode) {
-                btnGroup.innerHTML = `
-                    <button class="btn" onclick="exportarBackupJSON()">📥 Exportar JSON</button>
-                    <button class="btn" onclick="document.getElementById('jsonFileInput').click()">📤 Importar JSON</button>
-                    <button class="btn active-mode" onclick="toggleEditMode()">✏️ Edição Ativa</button>
-                    <button class="btn" onclick="openChampModal()">+ Novo Campeão</button>
-                `;
-            } else {
-                btnGroup.innerHTML = `
-                    <button class="btn" onclick="exportarBackupJSON()">📥 Exportar JSON</button>
-                    <button class="btn" onclick="document.getElementById('jsonFileInput').click()">📤 Importar JSON</button>
-                    <button class="btn" onclick="toggleEditMode()">👁️ Modo Leitura</button>
-                `;
-            }
+            btnGroup.innerHTML = `
+                <button class="btn" onclick="exportarBackupJSON()">📥 Exportar JSON</button>
+                <button class="btn" onclick="document.getElementById('jsonFileInput').click()">📤 Importar JSON</button>
+                <button class="btn" onclick="openChampModal()">+ Novo Campeão</button>
+            `;
 
             const main = document.getElementById("mainContainer");
             if (champions.length === 0) {
@@ -1261,7 +1262,7 @@ Primeiro Movimento
             let html = '<div class="champions-grid">';
             sortedChampions.forEach(c => {
                 const bgImg = (c.skins && c.skins[0] && c.skins[0].frameImg) ? c.skins[0].frameImg : (c.imgUrl || '');
-                const editBadge = isEditMode ? `<div class="champ-edit-badge" onclick="event.stopPropagation(); openChampModal(${c.id})">⚙️ Editar</div>` : '';
+                const editBadge = `<div class="champ-edit-badge" onclick="event.stopPropagation(); openChampModal(${c.id})">⚙️ Editar</div>`;
                 
                 const hasVideo = isMediaVideo(bgImg);
                 const mediaBg = hasVideo 
@@ -1285,6 +1286,26 @@ Primeiro Movimento
             updatePlayerMiniature();
         }
 
+        /* ATUALIZAÇÃO DA SPLASH ART DE FUNDO COM TRANSIÇÃO SUAVE E SEM RE-RENDERIZAÇÃO BRUSCA */
+        function updateBackgroundSplash(imageUrl) {
+            const fixedBg = document.getElementById("fixedBgLayer");
+            const fixedOverlay = document.getElementById("fixedBgOverlay");
+
+            if (!imageUrl) {
+                fixedBg.style.opacity = '0';
+                fixedOverlay.style.opacity = '0';
+                return;
+            }
+
+            const tempImg = new Image();
+            tempImg.src = imageUrl;
+            tempImg.onload = () => {
+                fixedBg.style.backgroundImage = `url('${imageUrl}')`;
+                fixedBg.style.opacity = '1';
+                fixedOverlay.style.opacity = '1';
+            };
+        }
+
         function showChampionPage(champId) {
             currentChampId = champId;
 
@@ -1292,26 +1313,14 @@ Primeiro Movimento
             if (!champ) return showChampionsList();
 
             const btnGroup = document.getElementById("headerBtnGroup");
-            let actionBtns = '';
-
-            if (isEditMode) {
-                actionBtns = `
-                    <button class="btn" onclick="exportarBackupJSON()">📥 Exportar JSON</button>
-                    <button class="btn" onclick="document.getElementById('jsonFileInput').click()">📤 Importar JSON</button>
-                    <button class="btn active-mode" onclick="toggleEditMode()">✏️ Edição Ativa</button>
-                    <button class="btn" onclick="openTextImportModal()">📄 Importar Falas (.txt)</button>
-                    <button class="btn" onclick="openQuickMediaModal()">🖼️ Imagens</button>
-                    <button class="btn" onclick="openTitleModal()">+ Categoria</button>
-                    <button class="btn" onclick="openQuoteModal()">+ Fala</button>
-                `;
-            } else {
-                actionBtns = `
-                    <button class="btn" onclick="exportarBackupJSON()">📥 Exportar JSON</button>
-                    <button class="btn" onclick="document.getElementById('jsonFileInput').click()">📤 Importar JSON</button>
-                    <button class="btn" onclick="toggleEditMode()">👁️ Modo Leitura</button>
-                `;
-            }
-            btnGroup.innerHTML = actionBtns;
+            btnGroup.innerHTML = `
+                <button class="btn" onclick="exportarBackupJSON()">📥 Exportar JSON</button>
+                <button class="btn" onclick="document.getElementById('jsonFileInput').click()">📤 Importar JSON</button>
+                <button class="btn" onclick="openTextImportModal()">📄 Importar Falas (.txt)</button>
+                <button class="btn" onclick="openQuickMediaModal()">🖼️ Imagens</button>
+                <button class="btn" onclick="openTitleModal()">+ Categoria</button>
+                <button class="btn" onclick="openQuoteModal()">+ Fala</button>
+            `;
 
             const main = document.getElementById("mainContainer");
             const tags = (champ.tags || "MID, MAGE").split(",").map(t => `<span class="tag-badge">${t.trim()}</span>`).join("");
@@ -1322,13 +1331,7 @@ Primeiro Movimento
             const activeSplashImg = currentSkin.splash || champ.splashUrl || champ.imgUrl || '';
             const activeSkinName = currentSkin.name || champ.name;
 
-            const fixedBg = document.getElementById("fixedBgLayer");
-            const fixedOverlay = document.getElementById("fixedBgOverlay");
-            if (activeSplashImg) {
-                fixedBg.style.backgroundImage = `url('${activeSplashImg}')`;
-                fixedBg.style.display = 'block';
-                fixedOverlay.style.display = 'block';
-            }
+            updateBackgroundSplash(activeSplashImg);
 
             let skinsHtml = '';
             skins.forEach((s, index) => {
@@ -1342,9 +1345,7 @@ Primeiro Movimento
                     </div>`;
             });
 
-            if (isEditMode) {
-                skinsHtml += `<div class="add-skin-card" title="Adicionar Skin" onclick="openChampModal(${champ.id})">+</div>`;
-            }
+            skinsHtml += `<div class="add-skin-card" title="Adicionar Skin" onclick="openChampModal(${champ.id})">+</div>`;
 
             const frameIsVideo = isMediaVideo(activeFrameImg);
             const frameMediaHtml = frameIsVideo 
@@ -1370,11 +1371,10 @@ Primeiro Movimento
                     <div class="skins-section">
                         <div class="section-label">
                             <span>Skins • ${skins.length}</span>
-                            ${isEditMode ? `
-                                <div>
-                                    <button class="btn" onclick="openTransferModal()">🔄 Copiar/Mover Falas</button>
-                                    <button class="btn" onclick="openChampModal(${champ.id})">⚙️ Editar Skins</button>
-                                </div>` : ''}
+                            <div>
+                                <button class="btn" onclick="openTransferModal()">🔄 Copiar/Mover Falas</button>
+                                <button class="btn" onclick="openChampModal(${champ.id})">⚙️ Editar Skins</button>
+                            </div>
                         </div>
                         <div class="skins-carousel">${skinsHtml}</div>
                     </div>
@@ -1415,12 +1415,12 @@ Primeiro Movimento
                     if (renderedCatIds.has(cat.id)) return;
                     renderedCatIds.add(cat.id);
 
-                    const titleActions = isEditMode ? `
+                    const titleActions = `
                         <div class="item-actions">
                             <span class="action-btn-add" title="Adicionar Subcategoria" onclick="openTitleModal(null, ${cat.id})">+ Subcat</span>
                             <span class="action-btn-add" title="Adicionar Fala" onclick="openQuoteModal(null, ${cat.id})">+ Fala</span>
                             <span class="action-icon" title="Editar" onclick="openTitleModal(${cat.id})">✏️</span>
-                        </div>` : '';
+                        </div>`;
 
                     html += `<div class="dynamic-header-container">
                         <div class="dynamic-header-content"><${cat.level}>${cat.text}</${cat.level}></div>
@@ -1441,10 +1441,10 @@ Primeiro Movimento
         }
 
         function renderQuoteRow(quote) {
-            const quoteActions = isEditMode ? `
+            const quoteActions = `
                 <div class="item-actions">
                     <span class="action-icon" title="Editar Fala" onclick="openQuoteModal(${quote.id})">✏️</span>
-                </div>` : '';
+                </div>`;
 
             let audioBtns = '';
             if (quote.audios) {
@@ -1480,9 +1480,7 @@ Primeiro Movimento
             const activeSplashImg = s.splash || champ.splashUrl || champ.imgUrl || '';
             const activeSkinName = s.name || champ.name;
 
-            if (activeSplashImg) {
-                document.getElementById("fixedBgLayer").style.backgroundImage = `url('${activeSplashImg}')`;
-            }
+            updateBackgroundSplash(activeSplashImg);
 
             document.getElementById('heroName').innerText = activeSkinName;
 
@@ -1891,6 +1889,7 @@ Primeiro Movimento
             document.getElementById("transferModal").style.display = "flex";
         }
 
+        /* EXECUÇÃO CORRIGIDA DE COPIAR / MOVER FALAS */
         function executeTransferQuotes() {
             const fromIdx = parseInt(document.getElementById("transferFromSkinSelect").value);
             const toIdx = parseInt(document.getElementById("transferToSkinSelect").value);
