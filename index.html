@@ -75,7 +75,6 @@
             background-size: cover;
             background-position: center top;
             background-repeat: no-repeat;
-            /* Removido background-attachment: fixed que quebra no Chrome/Safari mobile */
             z-index: -2;
             pointer-events: none;
             opacity: 0;
@@ -2213,12 +2212,24 @@ Primeiro Movimento
             const parentVal = document.getElementById("parentCategorySelect").value;
             const parentId = parentVal ? parseInt(parentVal) : null;
 
+            let existingRecord = null;
+            if (id) {
+                existingRecord = pageElements.find(e => e.id === parseInt(id));
+            }
+
+            let computedOrderIndex;
+            if (existingRecord && existingRecord.orderIndex !== undefined) {
+                computedOrderIndex = existingRecord.orderIndex;
+            } else {
+                computedOrderIndex = position === 'start' ? Date.now() * -1 : Date.now();
+            }
+
             const record = {
                 champId: currentChampId,
                 skinIndex: selectedSkinIndex,
                 type: 'title',
                 level, text, parentId, position,
-                orderIndex: position === 'start' ? Date.now() * -1 : Date.now()
+                orderIndex: computedOrderIndex
             };
 
             const tx = db.transaction(["elements"], "readwrite");
@@ -2314,12 +2325,24 @@ Primeiro Movimento
                 if (input.value.trim()) audios.push(input.value.trim());
             });
 
+            let existingRecord = null;
+            if (id) {
+                existingRecord = pageElements.find(e => e.id === parseInt(id));
+            }
+
+            let computedOrderIndex;
+            if (existingRecord && existingRecord.orderIndex !== undefined) {
+                computedOrderIndex = existingRecord.orderIndex;
+            } else {
+                computedOrderIndex = position === 'start' ? Date.now() * -1 : Date.now();
+            }
+
             const record = {
                 champId: currentChampId,
                 skinIndex: selectedSkinIndex,
                 type: 'quote',
                 text, audios, categoryId, position,
-                orderIndex: position === 'start' ? Date.now() * -1 : Date.now()
+                orderIndex: computedOrderIndex
             };
 
             const tx = db.transaction(["elements"], "readwrite");
